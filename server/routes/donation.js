@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Donation = require('../models/Donation');
-const { authenticate } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 
 // Create a donation
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
   try {
     const donation = new Donation({ ...req.body, user: req.user._id });
     await donation.save();
@@ -15,7 +15,7 @@ router.post('/', authenticate, async (req, res) => {
 });
 
 // Get all donations for a user
-router.get('/my', authenticate, async (req, res) => {
+router.get('/my', authenticateToken, async (req, res) => {
   try {
     const donations = await Donation.find({ user: req.user._id });
     res.json({ success: true, donations });
@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
 });
 
 // Update donation status
-router.patch('/:id', authenticate, async (req, res) => {
+router.patch('/:id', authenticateToken, async (req, res) => {
   try {
     const donation = await Donation.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json({ success: true, donation });
