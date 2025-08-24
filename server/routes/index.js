@@ -3,6 +3,8 @@ const router = express.Router();
 
 
 const authRoutes = require('./auth');
+const donationRoutes = require('./donation');
+const requestRoutes = require('./request');
 
 // Health check endpoint
 router.get('/health', (req, res) => {
@@ -16,6 +18,8 @@ router.get('/health', (req, res) => {
 
 // API routes
 router.use('/auth', authRoutes);
+router.use('/donations', donationRoutes);
+router.use('/requests', requestRoutes);
 
 // 404 handler for API routes (only one)
 router.use((req, res) => {

@@ -5,11 +5,12 @@ import Toast from './Toast';
 
 interface SignupPageProps {
   onNavigateToLogin: () => void;
+  onAuthSuccess: (data: any) => void;
 }
 
 type UserRole = 'donor' | 'recipient' | 'ngo';
 
-const SignupPage: React.FC<SignupPageProps> = ({ onNavigateToLogin }) => {
+const SignupPage: React.FC<SignupPageProps> = ({ onNavigateToLogin, onAuthSuccess }) => {
   const [formData, setFormData] = useState({
     name: '',
     emailOrPhone: '',

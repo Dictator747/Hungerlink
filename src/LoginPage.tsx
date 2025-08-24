@@ -4,9 +4,10 @@ import Logo from './Logo';
 
 interface LoginPageProps {
   onNavigateToSignup: () => void;
+  onAuthSuccess: (data: any) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup }) => {
+const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup, onAuthSuccess }) => {
   const [formData, setFormData] = useState({
     emailOrPhone: '',
     password: ''
@@ -39,9 +40,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup }) => {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        // Success: handle authentication (e.g., save token, redirect)
-        setError('');
-        console.log('Login successful', data);
+  setError('');
+  onAuthSuccess(data.data);
       } else {
         setError(data.message || 'Invalid email/phone or password. Please try again.');
       }
