@@ -5,10 +5,22 @@ const path = require('path');
 
 // Register new user
 const register = async (req, res) => {
-  console.log('Register route called');
-  console.log('Registration request body:', req.body);
   try {
+    console.log('Registration request received:', {
+      body: req.body,
+      file: req.file ? { filename: req.file.filename, size: req.file.size } : null
+    });
+
     const { name, emailOrPhone, password, role, location, ngoId } = req.body;
+
+    // Validate required fields
+    if (!name || !emailOrPhone || !password || !role || !location) {
+      return res.status(400).json({
+        success: false,
+        message: 'Missing required fields',
+        required: ['name', 'emailOrPhone', 'password', 'role', 'location']
+      });
+    }
 
     // Determine if emailOrPhone is email or phone
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
@@ -17,7 +29,6 @@ const register = async (req, res) => {
     // Check if user already exists
     const existingUser = await User.findByEmailOrPhone(emailOrPhone);
     if (existingUser) {
-      console.log('User already exists:', existingUser);
       return res.status(400).json({
         success: false,
         message: `User with this ${isEmail ? 'email' : 'phone number'} already exists`
@@ -63,44 +74,36 @@ const register = async (req, res) => {
       };
     }
 
+    console.log('Creating user with data:', userData);
+
     // Create user
     const user = new User(userData);
-    try {
-      await user.save();
-      console.log('User saved successfully:', user);
-    } catch (saveError) {
-      console.error('Error saving user:', saveError);
-      throw saveError;
-    }
+    await user.save();
+
+    console.log('User created successfully:', user._id);
 
     // Generate token
     const token = generateToken(user._id);
 
     // Update last login
     user.lastLogin = new Date();
-    try {
-      await user.save();
-      console.log('Last login updated for user:', user._id);
-    } catch (lastLoginError) {
-      console.error('Error updating last login:', lastLoginError);
-    }
+    await user.save();
 
     res.status(201).json({
       success: true,
       message: `🎉 Account created successfully. Welcome, ${user.name}!`,
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          role: user.role,
-          location: user.location,
-          ngoDetails: user.ngoDetails,
-          isActive: user.isActive
-        },
-        token
-      }
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        location: user.location,
+        isPhoneVerified: user.isPhoneVerified,
+        ngoDetails: user.ngoDetails,
+        isActive: user.isActive
+      },
+      token
     });
 
   } catch (error) {
@@ -147,7 +150,17 @@ const register = async (req, res) => {
 // Login user
 const login = async (req, res) => {
   try {
+    console.log('Login request received:', req.body);
+
     const { emailOrPhone, password } = req.body;
+
+    // Validate required fields
+    if (!emailOrPhone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email/phone and password are required'
+      });
+    }
 
     // Find user by email or phone and include password
     const user = await User.findByEmailOrPhone(emailOrPhone).select('+password');
@@ -200,23 +213,24 @@ const login = async (req, res) => {
     // Generate token
     const token = generateToken(user._id);
 
+    console.log('Login successful for user:', user._id);
+
     res.json({
       success: true,
       message: 'Login successful',
-      data: {
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          role: user.role,
-          location: user.location,
-          ngoDetails: user.ngoDetails,
-          isActive: user.isActive,
-          lastLogin: user.lastLogin
-        },
-        token
-      }
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        location: user.location,
+        isPhoneVerified: user.isPhoneVerified,
+        ngoDetails: user.ngoDetails,
+        isActive: user.isActive,
+        lastLogin: user.lastLogin
+      },
+      token
     });
 
   } catch (error) {
@@ -369,5 +383,5 @@ module.exports = {
   login,
   getProfile,
   updateProfile,
-  logout
+  logout,
 };

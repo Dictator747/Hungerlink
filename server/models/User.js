@@ -14,6 +14,8 @@ const userSchema = new mongoose.Schema({
     required: function() {
       return !this.phone;
     },
+    unique: true,
+    sparse: true,
     lowercase: true,
     trim: true,
     match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Please enter a valid email']
@@ -23,6 +25,8 @@ const userSchema = new mongoose.Schema({
     required: function() {
       return !this.email;
     },
+    unique: true,
+    sparse: true,
     trim: true,
     match: [/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
   },
@@ -82,14 +86,6 @@ const userSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
-  },
-  isEmailVerified: {
-    type: Boolean,
-    default: false
-  },
-  isPhoneVerified: {
-    type: Boolean,
-    default: false
   },
   // Timestamps
   lastLogin: {

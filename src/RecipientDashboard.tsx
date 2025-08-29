@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Eye, Clock, MapPin, ArrowLeft, Users } from 'lucide-react';
+import { Plus, Eye, Clock, MapPin, ArrowLeft, Users, Heart, TrendingUp, CheckCircle, Sparkles } from 'lucide-react';
 import Logo from './Logo';
 import Toast from './Toast';
 
@@ -39,6 +39,7 @@ const RecipientDashboard: React.FC<RecipientDashboardProps> = ({ user, onLogout 
   const [donations, setDonations] = useState<Donation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' as 'success' | 'error' });
+  const [focusedField, setFocusedField] = useState<string | null>(null);
 
   // Request form state
   const [requestForm, setRequestForm] = useState({
@@ -56,72 +57,13 @@ const RecipientDashboard: React.FC<RecipientDashboardProps> = ({ user, onLogout 
   }, []);
 
   const loadRequests = async () => {
-    // Mock data - replace with actual API call
-    const mockRequests: Request[] = [
-      {
-        id: '1',
-        foodNeeded: 'Rice or Chapati',
-        quantity: '50 meals',
-        location: 'Hope Shelter, Brigade Road',
-        ngoId: user?.role === 'ngo' ? 'NGO123456' : undefined,
-        status: 'accepted',
-        acceptedBy: 'Green Bowl Cafe',
-        createdAt: '2024-01-15T12:00:00Z'
-      },
-      {
-        id: '2',
-        foodNeeded: 'Any vegetarian food',
-        quantity: '30 meals',
-        location: 'Hope Shelter, Brigade Road',
-        ngoId: user?.role === 'ngo' ? 'NGO123456' : undefined,
-        status: 'pending',
-        createdAt: '2024-01-15T14:30:00Z'
-      }
-    ];
-    setRequests(mockRequests);
+    // Start with empty array - no sample data
+    setRequests([]);
   };
 
   const loadDonations = async () => {
-    // Mock data - replace with actual API call
-    const mockDonations: Donation[] = [
-      {
-        id: '1',
-        foodType: 'Vegetable Biryani',
-        quantity: '40 plates',
-        expiryTime: 'Today 6:30 PM',
-        location: 'Green Bowl Cafe, MG Road',
-        distance: '1.5 km',
-        donorName: 'Green Bowl Cafe',
-        aiQuality: 'fresh',
-        status: 'available',
-        createdAt: '2024-01-15T14:20:00Z'
-      },
-      {
-        id: '2',
-        foodType: 'Mixed Vegetables',
-        quantity: '25 portions',
-        expiryTime: 'Today 8:00 PM',
-        location: 'Spice Garden Restaurant',
-        distance: '2.3 km',
-        donorName: 'Spice Garden',
-        aiQuality: 'fresh',
-        status: 'available',
-        createdAt: '2024-01-15T15:45:00Z'
-      },
-      {
-        id: '3',
-        foodType: 'Bread and Curry',
-        quantity: '15 portions',
-        expiryTime: 'Today 7:00 PM',
-        location: 'Home Kitchen, Koramangala',
-        distance: '3.1 km',
-        donorName: 'Priya\'s Kitchen',
-        aiQuality: 'check',
-        status: 'available',
-        createdAt: '2024-01-15T16:10:00Z'
-      }
-    ];
-    setDonations(mockDonations);
+    // Start with empty array - no sample data
+    setDonations([]);
   };
 
   const handleRequestInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -241,23 +183,23 @@ const RecipientDashboard: React.FC<RecipientDashboardProps> = ({ user, onLogout 
 
   const getStatusBadge = (status: string, aiQuality?: string) => {
     if (aiQuality) {
-      if (aiQuality === 'fresh') return <span className="status-badge fresh">✅ Fresh</span>;
-      if (aiQuality === 'check') return <span className="status-badge check">⚠️ Check</span>;
-      if (aiQuality === 'not-suitable') return <span className="status-badge not-suitable">❌ Not Suitable</span>;
+      if (aiQuality === 'fresh') return <span className="badge badge-success">✅ Fresh</span>;
+      if (aiQuality === 'check') return <span className="badge badge-warning">⚠️ Check</span>;
+      if (aiQuality === 'not-suitable') return <span className="badge badge-error">❌ Not Suitable</span>;
     }
     
-    if (status === 'pending') return <span className="status-badge pending">Pending</span>;
-    if (status === 'accepted') return <span className="status-badge accepted">Accepted</span>;
-    if (status === 'fulfilled') return <span className="status-badge fulfilled">Fulfilled</span>;
-    if (status === 'available') return <span className="status-badge available">Available</span>;
-    if (status === 'claimed') return <span className="status-badge claimed">Claimed</span>;
+    if (status === 'pending') return <span className="badge badge-warning">Pending</span>;
+    if (status === 'accepted') return <span className="badge badge-success">Accepted</span>;
+    if (status === 'fulfilled') return <span className="badge badge-success">Fulfilled</span>;
+    if (status === 'available') return <span className="badge badge-info">Available</span>;
+    if (status === 'claimed') return <span className="badge badge-success">Claimed</span>;
     
     return null;
   };
 
   if (currentView === 'request') {
     return (
-      <div className="dashboard-container">
+      <div className="min-h-screen bg-warm-gradient relative overflow-hidden">
         <Toast 
           message={toast.message}
           isVisible={toast.show}
@@ -265,91 +207,233 @@ const RecipientDashboard: React.FC<RecipientDashboardProps> = ({ user, onLogout 
           type={toast.type}
         />
 
-        <div className="dashboard-wrapper">
-          <div className="dashboard-header">
-            <button onClick={() => setCurrentView('dashboard')} className="back-button">
-              <ArrowLeft />
-            </button>
-            <Logo />
-          </div>
+        {/* Background Decorations */}
+        <div className="absolute inset-0 overflow-hidden" style={{ pointerEvents: 'none' }}>
+          <div 
+            className="absolute w-32 h-32 bg-secondary-500 rounded-full animate-float"
+            style={{ 
+              top: '5rem', 
+              left: '2.5rem',
+              opacity: '0.1',
+              filter: 'blur(3rem)'
+            }} 
+          />
+          <div 
+            className="absolute w-40 h-40 bg-primary-500 rounded-full animate-float"
+            style={{ 
+              bottom: '5rem', 
+              right: '2.5rem',
+              opacity: '0.1',
+              filter: 'blur(3rem)',
+              animationDelay: '1s'
+            }} 
+          />
+          <Sparkles 
+            className="absolute w-6 h-6 animate-bounce"
+            style={{ 
+              top: '25%', 
+              right: '25%',
+              color: 'rgba(59, 178, 115, 0.3)',
+              animationDelay: '0.5s'
+            }} 
+          />
+        </div>
 
-          <div className="dashboard-card">
-            <h2 className="dashboard-title">🍽 Request Food</h2>
-            
-            <form onSubmit={handleRequestSubmit} className="donation-form">
-              <div className="form-group">
-                <input
-                  type="text"
-                  name="foodNeeded"
-                  placeholder="Food needed (e.g., Rice or Chapati)"
-                  value={requestForm.foodNeeded}
-                  onChange={handleRequestInputChange}
-                  className="form-input"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <input
-                  type="text"
-                  name="quantity"
-                  placeholder="Quantity (e.g., 50 meals)"
-                  value={requestForm.quantity}
-                  onChange={handleRequestInputChange}
-                  className="form-input"
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <div className="location-group">
-                  <input
-                    type="text"
-                    name="location"
-                    placeholder="Location"
-                    value={requestForm.location}
-                    onChange={handleRequestInputChange}
-                    className="form-input location-input"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={getCurrentLocation}
-                    disabled={isGettingLocation}
-                    className="location-btn"
-                    title="Use my GPS location"
-                  >
-                    {isGettingLocation ? (
-                      <div className="spinner"></div>
-                    ) : (
-                      <MapPin />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {user?.role === 'ngo' && (
-                <div className="form-group">
-                  <input
-                    type="text"
-                    name="ngoId"
-                    placeholder="NGO Registration ID"
-                    value={requestForm.ngoId}
-                    onChange={handleRequestInputChange}
-                    className="form-input ngo-input"
-                    required
-                  />
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="btn-primary"
+        <div className="container section-padding relative z-10">
+          <div className="max-w-2xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8 animate-slide-down">
+              <button 
+                onClick={() => setCurrentView('dashboard')} 
+                className="back-button group"
               >
-                {isLoading ? 'Posting...' : 'Post Request'}
+                <ArrowLeft className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1" />
+                <span className="text-dark">Back</span>
               </button>
-            </form>
+              <Logo size="sm" />
+            </div>
+
+            {/* Request Form Card */}
+            <div className="card p-8 animate-slide-up">
+              <div className="text-center mb-8">
+                <div 
+                  className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 animate-bounce-gentle"
+                  style={{ background: 'linear-gradient(135deg, var(--secondary-500), var(--secondary-600))' }}
+                >
+                  <Plus className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-3xl font-display font-bold text-gradient mb-2">
+                  🍽 Request Food
+                </h2>
+                <p className="dashboard-subtitle">
+                  {user?.role === 'ngo' ? 'Request food assistance for your community' : 'Request food assistance for your family'}
+                </p>
+              </div>
+              
+              <form onSubmit={handleRequestSubmit} className="auth-form">
+                {/* Food Needed */}
+                <div className="form-group">
+                  <label className="form-label">Food Needed</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="foodNeeded"
+                      placeholder="e.g., Rice or Chapati, Any vegetarian food"
+                      value={requestForm.foodNeeded}
+                      onChange={handleRequestInputChange}
+                      onFocus={() => setFocusedField('foodNeeded')}
+                      onBlur={() => setFocusedField(null)}
+                      className={`input-field transition-all duration-300 ${
+                        focusedField === 'foodNeeded' ? 'scale-105' : ''
+                      }`}
+                      style={{
+                        boxShadow: focusedField === 'foodNeeded' ? 'var(--shadow-glow)' : undefined
+                      }}
+                      required
+                    />
+                    {focusedField === 'foodNeeded' && (
+                      <div 
+                        className="absolute inset-0 rounded-2xl -z-10"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(59, 178, 115, 0.2), rgba(255, 122, 0, 0.2))',
+                          filter: 'blur(1.5rem)'
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Quantity */}
+                <div className="form-group">
+                  <label className="form-label">Quantity</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="quantity"
+                      placeholder="e.g., 50 meals, 20 portions"
+                      value={requestForm.quantity}
+                      onChange={handleRequestInputChange}
+                      onFocus={() => setFocusedField('quantity')}
+                      onBlur={() => setFocusedField(null)}
+                      className={`input-field transition-all duration-300 ${
+                        focusedField === 'quantity' ? 'scale-105' : ''
+                      }`}
+                      style={{
+                        boxShadow: focusedField === 'quantity' ? 'var(--shadow-glow)' : undefined
+                      }}
+                      required
+                    />
+                    {focusedField === 'quantity' && (
+                      <div 
+                        className="absolute inset-0 rounded-2xl -z-10"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(59, 178, 115, 0.2), rgba(255, 122, 0, 0.2))',
+                          filter: 'blur(1.5rem)'
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div className="form-group">
+                  <label className="form-label flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-secondary-500" />
+                    Location
+                  </label>
+                  <div className="flex gap-3">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        name="location"
+                        placeholder="Enter delivery location"
+                        value={requestForm.location}
+                        onChange={handleRequestInputChange}
+                        onFocus={() => setFocusedField('location')}
+                        onBlur={() => setFocusedField(null)}
+                        className={`input-field transition-all duration-300 ${
+                          focusedField === 'location' ? 'scale-105' : ''
+                        }`}
+                        style={{
+                          boxShadow: focusedField === 'location' ? 'var(--shadow-glow)' : undefined
+                        }}
+                        required
+                      />
+                      {focusedField === 'location' && (
+                        <div 
+                          className="absolute inset-0 rounded-2xl -z-10"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(59, 178, 115, 0.2), rgba(255, 122, 0, 0.2))',
+                            filter: 'blur(1.5rem)'
+                          }}
+                        />
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={getCurrentLocation}
+                      disabled={isGettingLocation}
+                      className="btn-secondary flex-shrink-0"
+                      style={{ padding: 'var(--space-4)' }}
+                      title="Use my GPS location"
+                    >
+                      {isGettingLocation ? (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" style={{ borderTopColor: 'transparent' }} />
+                      ) : (
+                        <MapPin className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* NGO ID (if NGO) */}
+                {user?.role === 'ngo' && (
+                  <div className="p-6 bg-secondary-50 border-2 border-secondary-200 rounded-2xl animate-slide-down">
+                    <div className="flex items-center gap-2 text-secondary-700 font-semibold mb-4">
+                      <Users className="w-5 h-5" />
+                      <span className="text-dark">NGO Information</span>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">NGO Registration ID</label>
+                      <input
+                        type="text"
+                        name="ngoId"
+                        placeholder="Enter your NGO registration ID"
+                        value={requestForm.ngoId}
+                        onChange={handleRequestInputChange}
+                        className="input-field"
+                        style={{
+                          borderColor: 'var(--secondary-300)',
+                          backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                        }}
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`btn-primary w-full group ${
+                    isLoading ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" style={{ borderTopColor: 'transparent' }} />
+                      Posting...
+                    </>
+                  ) : (
+                    <>
+                      Post Request
+                      <Heart className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -358,7 +442,7 @@ const RecipientDashboard: React.FC<RecipientDashboardProps> = ({ user, onLogout 
 
   if (currentView === 'donations') {
     return (
-      <div className="dashboard-container">
+      <div className="min-h-screen bg-warm-gradient relative overflow-hidden">
         <Toast 
           message={toast.message}
           isVisible={toast.show}
@@ -366,56 +450,79 @@ const RecipientDashboard: React.FC<RecipientDashboardProps> = ({ user, onLogout 
           type={toast.type}
         />
 
-        <div className="dashboard-wrapper">
-          <div className="dashboard-header">
-            <button onClick={() => setCurrentView('dashboard')} className="back-button">
-              <ArrowLeft />
-            </button>
-            <Logo />
-          </div>
+        {/* Background Decorations */}
+        <div className="absolute inset-0 overflow-hidden" style={{ pointerEvents: 'none' }}>
+          <div 
+            className="absolute w-32 h-32 bg-primary-500 rounded-full animate-float"
+            style={{ 
+              top: '5rem', 
+              right: '5rem',
+              opacity: '0.1',
+              filter: 'blur(3rem)'
+            }} 
+          />
+          <div 
+            className="absolute w-40 h-40 bg-secondary-500 rounded-full animate-float"
+            style={{ 
+              bottom: '8rem', 
+              left: '4rem',
+              opacity: '0.1',
+              filter: 'blur(3rem)',
+              animationDelay: '2s'
+            }} 
+          />
+          <Sparkles 
+            className="absolute w-6 h-6 animate-bounce"
+            style={{ 
+              top: '33%', 
+              left: '33%',
+              color: 'rgba(255, 122, 0, 0.3)',
+              animationDelay: '1s'
+            }} 
+          />
+        </div>
 
-          <div className="dashboard-card">
-            <h2 className="dashboard-title">🥘 Available Donations</h2>
+        <div className="container section-padding relative z-10">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8 animate-slide-down">
+              <button 
+                onClick={() => setCurrentView('dashboard')} 
+                className="back-button group"
+              >
+                <ArrowLeft className="w-5 h-5 transition-transform duration-300 group-hover:-translate-x-1" />
+                <span className="text-dark">Back</span>
+              </button>
+              <Logo size="sm" />
+            </div>
+
+            {/* Donations Header */}
+            <div className="text-center mb-12 animate-slide-up">
+              <div 
+                className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 animate-bounce-gentle"
+                style={{ background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))' }}
+              >
+                <Heart className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-3xl font-display font-bold text-gradient mb-2">
+                🥘 Available Donations
+              </h2>
+              <p className="dashboard-subtitle">
+                Discover fresh food donations from generous donors nearby
+              </p>
+            </div>
             
-            <div className="donations-list">
-              {donations.filter(d => d.status === 'available').length === 0 ? (
-                <div className="empty-state">
-                  <p>No donations available at the moment.</p>
-                </div>
-              ) : (
-                donations.filter(d => d.status === 'available').map(donation => (
-                  <div key={donation.id} className="donation-card">
-                    <div className="donation-header">
-                      <h3 className="donation-title">{donation.foodType}</h3>
-                      {getStatusBadge(donation.status, donation.aiQuality)}
-                    </div>
-                    <div className="donation-details">
-                      <p className="donation-quantity">{donation.quantity}</p>
-                      <p className="donation-expiry">
-                        <Clock className="expiry-icon" />
-                        Expires: {donation.expiryTime}
-                      </p>
-                      <p className="donation-location">
-                        <MapPin className="location-icon" />
-                        {donation.location} • {donation.distance} away
-                      </p>
-                      <p className="donation-donor">By {donation.donorName}</p>
-                    </div>
-                    {donation.photo && (
-                      <div className="donation-photo">
-                        <img src={donation.photo} alt={donation.foodType} />
-                      </div>
-                    )}
-                    <button
-                      onClick={() => handleClaimDonation(donation.id)}
-                      disabled={isLoading}
-                      className="btn-secondary"
-                    >
-                      Claim Food
-                    </button>
+            {/* Empty State */}
+            <div className="grid-responsive">
+              <div style={{ gridColumn: '1 / -1' }}>
+                <div className="card p-12 text-center animate-scale-in">
+                  <div className="w-24 h-24 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Heart className="w-12 h-12 text-neutral-400" />
                   </div>
-                ))
-              )}
+                  <h3 className="text-xl font-semibold dashboard-title mb-2">No donations available</h3>
+                  <p className="dashboard-subtitle">Check back later for new food donations from the community.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -424,7 +531,7 @@ const RecipientDashboard: React.FC<RecipientDashboardProps> = ({ user, onLogout 
   }
 
   return (
-    <div className="dashboard-container">
+    <div className="min-h-screen bg-warm-gradient relative overflow-hidden">
       <Toast 
         message={toast.message}
         isVisible={toast.show}
@@ -432,70 +539,180 @@ const RecipientDashboard: React.FC<RecipientDashboardProps> = ({ user, onLogout 
         type={toast.type}
       />
 
-      <div className="dashboard-wrapper">
-        <div className="dashboard-header">
-          <Logo />
-          <button onClick={onLogout} className="logout-btn">Logout</button>
-        </div>
+      {/* Background Decorations */}
+      <div className="absolute inset-0 overflow-hidden" style={{ pointerEvents: 'none' }}>
+        <div 
+          className="absolute w-32 h-32 bg-secondary-500 rounded-full animate-float"
+          style={{ 
+            top: '5rem', 
+            left: '2.5rem',
+            opacity: '0.1',
+            filter: 'blur(3rem)'
+          }} 
+        />
+        <div 
+          className="absolute w-40 h-40 bg-primary-500 rounded-full animate-float"
+          style={{ 
+            bottom: '5rem', 
+            right: '2.5rem',
+            opacity: '0.1',
+            filter: 'blur(3rem)',
+            animationDelay: '1s'
+          }} 
+        />
+        <div 
+          className="absolute w-24 h-24 rounded-full animate-pulse-soft"
+          style={{ 
+            top: '50%', 
+            left: '25%',
+            background: 'rgba(245, 158, 11, 0.1)',
+            filter: 'blur(2rem)'
+          }} 
+        />
+        
+        {/* Floating Sparkles */}
+        <Sparkles 
+          className="absolute w-6 h-6 animate-bounce"
+          style={{ 
+            top: '25%', 
+            right: '25%',
+            color: 'rgba(59, 178, 115, 0.3)',
+            animationDelay: '0.5s'
+          }} 
+        />
+        <Sparkles 
+          className="absolute w-4 h-4 animate-bounce"
+          style={{ 
+            bottom: '33%', 
+            left: '33%',
+            color: 'rgba(255, 122, 0, 0.3)',
+            animationDelay: '1.5s'
+          }} 
+        />
+      </div>
 
-        <div className="dashboard-card">
-          <div className="welcome-section">
-            <h2 className="welcome-title">👋 Welcome, {user?.name}</h2>
-            <p className="welcome-subtitle">
-              {user?.role === 'ngo' ? 'Helping communities access food' : 'Find food assistance nearby'}
+      <div className="container section-padding relative z-10">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-12 animate-slide-down">
+            <Logo size="md" animated={true} />
+            <button onClick={onLogout} className="btn-ghost group">
+              <span className="text-dark">Logout</span>
+              <ArrowLeft className="w-4 h-4 rotate-180 transition-transform duration-300 group-hover:translate-x-1" />
+            </button>
+          </div>
+
+          {/* Welcome Section */}
+          <div className="text-center mb-16 animate-slide-up">
+            <div 
+              className="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-6 animate-bounce-gentle"
+              style={{ background: 'linear-gradient(135deg, var(--secondary-500), var(--secondary-600))' }}
+            >
+              {user?.role === 'ngo' ? <Users className="w-10 h-10 text-white" /> : <Heart className="w-10 h-10 text-white" />}
+            </div>
+            <h1 className="text-4xl md:text-5xl font-display font-bold text-gradient mb-4">
+              👋 Welcome, {user?.name}
+            </h1>
+            <p className="text-xl dashboard-subtitle max-w-2xl mx-auto">
+              {user?.role === 'ngo' 
+                ? 'Helping communities access nutritious food and support those in need.'
+                : 'Find food assistance and connect with generous donors in your community.'
+              }
             </p>
           </div>
 
-          <div className="cta-buttons">
+          {/* CTA Buttons */}
+          <div className="grid md:grid-cols-2 gap-6 mb-16 animate-scale-in">
             <button 
               onClick={() => setCurrentView('request')}
-              className="cta-button primary"
+              className="group relative overflow-hidden p-8 rounded-3xl text-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105"
+              style={{ background: 'linear-gradient(135deg, var(--secondary-500), var(--secondary-600))' }}
             >
-              <Plus className="cta-icon" />
-              🍽 Request Food
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -translate-x-full transition-transform duration-700 group-hover:translate-x-full" />
+              <div className="relative flex items-center justify-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+                  <Plus className="w-6 h-6" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-2xl font-bold mb-1 text-white">🍽 Request Food</h3>
+                  <p className="text-white opacity-80">Post your food needs</p>
+                </div>
+              </div>
             </button>
+            
             <button 
               onClick={() => setCurrentView('donations')}
-              className="cta-button secondary"
+              className="group relative overflow-hidden p-8 bg-mesh-gradient rounded-3xl text-white shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-105"
             >
-              <Eye className="cta-icon" />
-              🥘 View Donations
+              <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -translate-x-full transition-transform duration-700 group-hover:translate-x-full" />
+              <div className="relative flex items-center justify-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+                  <Eye className="w-6 h-6" />
+                </div>
+                <div className="text-left">
+                  <h3 className="text-2xl font-bold mb-1 text-white">🥘 View Donations</h3>
+                  <p className="text-white opacity-80">Browse available food</p>
+                </div>
+              </div>
             </button>
           </div>
 
-          <div className="requests-section">
-            <h3 className="section-title">Your Requests</h3>
-            <div className="requests-list">
-              {requests.length === 0 ? (
-                <div className="empty-state">
-                  <p>No requests yet. Start by posting your first request!</p>
-                </div>
-              ) : (
-                requests.map(request => (
-                  <div key={request.id} className="request-card">
-                    <div className="request-header">
-                      <h4 className="request-title">{request.foodNeeded}</h4>
-                      {getStatusBadge(request.status)}
-                    </div>
-                    <div className="request-details">
-                      <p className="request-quantity">{request.quantity}</p>
-                      <p className="request-location">
-                        <MapPin className="location-icon" />
-                        {request.location}
-                      </p>
-                      {request.acceptedBy && (
-                        <p className="request-accepted">Accepted by {request.acceptedBy}</p>
-                      )}
-                      {request.ngoId && (
-                        <p className="request-ngo">
-                          <Users className="ngo-icon" />
-                          NGO ID: {request.ngoId}
-                        </p>
-                      )}
-                    </div>
+          {/* Stats Cards */}
+          <div className="grid md:grid-cols-3 gap-6 mb-16">
+            <div className="stats-card animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              <div className="w-12 h-12 bg-secondary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <TrendingUp className="w-6 h-6 text-secondary-600" />
+              </div>
+              <h3 className="stats-number">{requests.length}</h3>
+              <p className="stats-label">Total Requests</p>
+            </div>
+            
+            <div className="stats-card animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <div className="w-12 h-12 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Heart className="w-6 h-6 text-primary-600" />
+              </div>
+              <h3 className="stats-number">{requests.filter(r => r.status === 'fulfilled').length}</h3>
+              <p className="stats-label">Meals Received</p>
+            </div>
+            
+            <div className="stats-card animate-slide-up" style={{ animationDelay: '0.3s' }}>
+              <div 
+                className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                style={{ backgroundColor: 'rgba(245, 158, 11, 0.2)' }}
+              >
+                <Users className="w-6 h-6 text-warning" />
+              </div>
+              <h3 className="stats-number">{requests.filter(r => r.status === 'pending').length}</h3>
+              <p className="stats-label">Active Requests</p>
+            </div>
+          </div>
+
+          {/* Requests History */}
+          <div className="animate-slide-up" style={{ animationDelay: '0.4s' }}>
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-display font-bold dashboard-title">Your Requests</h2>
+              <div className="flex items-center gap-2 card-text">
+                <Clock className="w-4 h-4" />
+                <span className="text-sm">Recent activity</span>
+              </div>
+            </div>
+            
+            <div className="grid-responsive">
+              <div style={{ gridColumn: '1 / -1' }}>
+                <div className="card p-12 text-center">
+                  <div className="w-24 h-24 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Heart className="w-12 h-12 text-neutral-400" />
                   </div>
-                ))
-              )}
+                  <h3 className="text-xl font-semibold dashboard-title mb-2">No requests yet</h3>
+                  <p className="dashboard-subtitle mb-6">Start by posting your first food request to get help from the community.</p>
+                  <button 
+                    onClick={() => setCurrentView('request')}
+                    className="btn-primary"
+                  >
+                    Post Your First Request
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
