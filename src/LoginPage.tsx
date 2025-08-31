@@ -146,7 +146,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup, onAuthSuccess
                     focusedField === 'emailOrPhone' ? 'scale-105' : ''
                   }`}
                   style={{
-                    boxShadow: focusedField === 'emailOrPhone' ? 'var(--shadow-glow)' : undefined
+                    boxShadow: focusedField === 'emailOrPhone' ? 'var(--shadow-glow)' : undefined,
+                    color: '#000000'
                   }}
                   required
                 />
@@ -182,7 +183,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onNavigateToSignup, onAuthSuccess
                   }`}
                   style={{
                     paddingRight: '3rem',
-                    boxShadow: focusedField === 'password' ? 'var(--shadow-glow)' : undefined
+                    boxShadow: focusedField === 'password' ? 'var(--shadow-glow)' : undefined,
+                    color: '#000000'
                   }}
                   required
                 />
